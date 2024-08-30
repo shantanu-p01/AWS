@@ -19,7 +19,7 @@ Connect to your EC2 instance using SSH:
 ssh -i "C:\Users\GawD\Downloads\WebServer.pem" ubuntu@13.201.22.142
 ```
 
-![SSH Connection to AWS EC2 Instance using MobaXterm](/img/SSH%20Connection%20MobaXterm.png)
+![SSH Connection to AWS EC2 Instance using MobaXterm](/multipleWebsites/img/SSH%20Connection%20MobaXterm.png)
 
 ### 2. Update and Upgrade the Server
 
@@ -45,7 +45,7 @@ Use `scp` to securely copy the website files (`web1`, `web2`, `web3`) from your 
 scp -i "C:\Users\GawD\Downloads\WebServer.pem" -r web1 web2 web3 ubuntu@13.201.22.142:~
 ```
 
-![Transferring files from Local Machine to AWS EC2](/img/Transferring%20files%20from%20Local%20Machine%20to%20AWS%20EC2.png)
+![Transferring files from Local Machine to AWS EC2](/multipleWebsites/img/Transferring%20files%20from%20Local%20Machine%20to%20AWS%20EC2.png)
 
 ### 5. Create Directories for Each Website
 
@@ -98,7 +98,7 @@ sudo nano /etc/apache2/sites-available/web3.kubez.cloud.conf
 
 Repeat the above steps for `web2.kubez.cloud.conf` and `web3.kubez.cloud.conf` with the appropriate changes.
 
-![Custom Conf](/img/Custom%20Conf.png)
+![Custom Conf](/multipleWebsites/img/Custom%20Conf.png)
 
 ### 9. Enable the Configuration Files
 
@@ -132,7 +132,7 @@ Add the following lines:
 13.201.22.142 web3.kubez.cloud
 ```
 
-![Adding Domains to hosts file](/img/Adding%20Domains%20to%20hosts%20file.png)
+![Adding Domains to hosts file](/multipleWebsites/img/Adding%20Domains%20to%20hosts%20file.png)
 
 ### 12. Set Up DNS Configuration
 
@@ -140,7 +140,7 @@ For the domains to be publicly accessible, configure your DNS settings to point 
 
 > **Note:** The exact steps to set up DNS records depend on your domain registrar. Generally, you need to add an `A` record for each domain (`web1.kubez.cloud`, `web2.kubez.cloud`, `web3.kubez.cloud`) pointing to your EC2 instance's public IP address.
 
-![DNS Configuration Screenshot](/img/CloudFlare%20DNS%20Records.png)
+![DNS Configuration Screenshot](/multipleWebsites/img/CloudFlare%20DNS%20Records.png)
 
 ## Testing and Verification
 
@@ -152,7 +152,7 @@ For the domains to be publicly accessible, configure your DNS settings to point 
    sudo apache2ctl -S
    ```
 
-   ![Check Apache Config](/img/Check%20Apache%20Config.png)
+   ![Check Apache Config](/multipleWebsites/img/Check%20Apache%20Config.png)
 
 2. **Open Each Website in Browser:**
 
@@ -164,9 +164,9 @@ For the domains to be publicly accessible, configure your DNS settings to point 
 
    You should see the `index.html` content for each respective website.
 
-   ![Website 1 Loaded in Browser](/img/Web1%20over%20Custom%20Domain%20routed%20to%20EC2%20Public%20IP.png)
-   ![Website 2 Loaded in Browser](/img/Web2%20over%20Custom%20Domain%20routed%20to%20EC2%20Public%20IP.png)
-   ![Website 3 Loaded in Browser](/img/Web3%20over%20Custom%20Domain%20routed%20to%20EC2%20Public%20IP.png)
+   ![Website 1 Loaded in Browser](/multipleWebsites/img/Web1%20over%20Custom%20Domain%20routed%20to%20EC2%20Public%20IP.png)
+   ![Website 2 Loaded in Browser](/multipleWebsites/img/Web2%20over%20Custom%20Domain%20routed%20to%20EC2%20Public%20IP.png)
+   ![Website 3 Loaded in Browser](/multipleWebsites/img/Web3%20over%20Custom%20Domain%20routed%20to%20EC2%20Public%20IP.png)
 
 ## Troubleshooting
 
