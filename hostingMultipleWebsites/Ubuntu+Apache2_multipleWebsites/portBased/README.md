@@ -19,7 +19,7 @@ Connect to your EC2 instance using SSH:
 ssh -i "C:\Users\GawD\Downloads\WebServer.pem" ubuntu@13.201.100.252
 ```
 
-![SSH Connection Screenshot](/Ubuntu+Apache2_multipleWebsites/portBased/img/SSH-connection-screenshot.png)
+![SSH Connection Screenshot](/hostingMultipleWebsites/Ubuntu+Apache2_multipleWebsites/portBased/img/SSH-connection-screenshot.png)
 
 ### 2. Update and Upgrade the Server
 
@@ -55,7 +55,7 @@ Listen 8082
 Listen 8083
 ```
 
-![Apache Ports Configuration Screenshot](/Ubuntu+Apache2_multipleWebsites/portBased/img/ports-conf-screenshot.png)
+![Apache Ports Configuration Screenshot](/hostingMultipleWebsites/Ubuntu+Apache2_multipleWebsites/portBased/img/ports-conf-screenshot.png)
 
 ### 5. Create Directories for Each Website
 
@@ -73,7 +73,7 @@ Copy the required folder for each website from your local machine to their respe
 scp -i "C:\Users\GawD\Downloads\WebServer.pem" -r web1 web2 web3 ubuntu@13.201.100.252:~
 ```
 
-![File Transfer Screenshot](/Ubuntu+Apache2_multipleWebsites/portBased/img/file-transfer-screenshot.png)
+![File Transfer Screenshot](/hostingMultipleWebsites/Ubuntu+Apache2_multipleWebsites/portBased/img/file-transfer-screenshot.png)
 
 Copy the `index.html` files for each website to their respective directories:
 
@@ -109,7 +109,7 @@ sudo nano /etc/apache2/sites-available/web1.conf
 </VirtualHost>
 ```
 
-![Web1 Configuration Screenshot](/Ubuntu+Apache2_multipleWebsites/portBased/img/web1-conf-screenshot.png)
+![Web1 Configuration Screenshot](/hostingMultipleWebsites/Ubuntu+Apache2_multipleWebsites/portBased/img/web1-conf-screenshot.png)
 
 Repeat for `web2` and `web3` on different ports (e.g., 8082 and 8083):
 
@@ -128,7 +128,7 @@ sudo nano /etc/apache2/sites-available/web2.conf
 </VirtualHost>
 ```
 
-![Web2 Configuration Screenshot](/Ubuntu+Apache2_multipleWebsites/portBased/img/web2-conf-screenshot.png)
+![Web2 Configuration Screenshot](/hostingMultipleWebsites/Ubuntu+Apache2_multipleWebsites/portBased/img/web2-conf-screenshot.png)
 
 ```bash
 sudo nano /etc/apache2/sites-available/web3.conf
@@ -145,7 +145,7 @@ sudo nano /etc/apache2/sites-available/web3.conf
 </VirtualHost>
 ```
 
-![Web3 Configuration Screenshot](/Ubuntu+Apache2_multipleWebsites/portBased/img/web3-conf-screenshot.png)
+![Web3 Configuration Screenshot](/hostingMultipleWebsites/Ubuntu+Apache2_multipleWebsites/portBased/img/web3-conf-screenshot.png)
 
 ### 9. Enable the Configuration Files
 
@@ -155,7 +155,7 @@ Enable each website's configuration file in Apache:
 sudo a2ensite web1.conf web2.conf web3.conf
 ```
 
-![Enable Sites Screenshot](/Ubuntu+Apache2_multipleWebsites/portBased/img/enable-sites-screenshot.png)
+![Enable Sites Screenshot](/hostingMultipleWebsites/Ubuntu+Apache2_multipleWebsites/portBased/img/enable-sites-screenshot.png)
 
 ### 10. Restart Apache Web Server
 
@@ -180,13 +180,13 @@ You should see the virtual hosts listed for ports 8081, 8082, and 8083.
 Open your browser and navigate to the following URLs:
 
 - `http://13.201.100.252:8081` for `web1`
-![Web1 Loaded in Browser](/Ubuntu+Apache2_multipleWebsites/portBased/img/web1-loaded-screenshot.png)
+![Web1 Loaded in Browser](/hostingMultipleWebsites/Ubuntu+Apache2_multipleWebsites/portBased/img/web1-loaded-screenshot.png)
 
 - `http://13.201.100.252:8082` for `web2`
-![Web2 Loaded in Browser](/Ubuntu+Apache2_multipleWebsites/portBased/img/web2-loaded-screenshot.png)
+![Web2 Loaded in Browser](/hostingMultipleWebsites/Ubuntu+Apache2_multipleWebsites/portBased/img/web2-loaded-screenshot.png)
 
 - `http://13.201.100.252:8083` for `web3`
-![Web3 Loaded in Browser](/Ubuntu+Apache2_multipleWebsites/portBased/img/web3-loaded-screenshot.png)
+![Web3 Loaded in Browser](/hostingMultipleWebsites/Ubuntu+Apache2_multipleWebsites/portBased/img/web3-loaded-screenshot.png)
 
 Replace `13.201.100.252` with your EC2 instance's public IP address. You should see the `index.html` content for each respective website.
 

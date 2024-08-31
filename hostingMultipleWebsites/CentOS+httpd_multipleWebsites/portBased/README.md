@@ -22,7 +22,7 @@ Connect to your EC2 instance using SSH:
 ssh -i "C:\Users\GawD\Downloads\WebServer.pem" ec2-user@15.206.84.57
 ```
 
-![SSH Connection Screenshot](/CentOS+httpd_multipleWebsites/portBased/img/SSH-connection-screenshot.png)
+![SSH Connection Screenshot](/hostingMultipleWebsites/CentOS+httpd_multipleWebsites/portBased/img/SSH-connection-screenshot.png)
 
 ### 2. Update and Upgrade the Server
 
@@ -58,7 +58,7 @@ Listen 82
 Listen 83
 ```
 
-![HTTPD Apache Ports Configuration Screenshot](/CentOS+httpd_multipleWebsites/portBased/img/ports-conf-screenshot.png)
+![HTTPD Apache Ports Configuration Screenshot](/hostingMultipleWebsites/CentOS+httpd_multipleWebsites/portBased/img/ports-conf-screenshot.png)
 
 ### 5. Create Directories for Each Website
 
@@ -76,7 +76,7 @@ Copy the required folder for each website from your local machine to their respe
 scp -i "C:\Users\GawD\Downloads\WebServer.pem" -r web1 web2 web3 ec2-user@15.206.84.57:~
 ```
 
-![File Transfer Screenshot](/CentOS+httpd_multipleWebsites/portBased/img/file-transfer-screenshot.png)
+![File Transfer Screenshot](/hostingMultipleWebsites/CentOS+httpd_multipleWebsites/portBased/img/file-transfer-screenshot.png)
 
 Copy the `index.html` files for each website to their respective directories:
 
@@ -135,7 +135,7 @@ sudo nano /etc/httpd/conf/httpd.conf
 </VirtualHost>
 ```
 
-![Web1 Configuration Screenshot](/CentOS+httpd_multipleWebsites/portBased/img/httpd-conf-screenshot.png)
+![Web1 Configuration Screenshot](/hostingMultipleWebsites/CentOS+httpd_multipleWebsites/portBased/img/httpd-conf-screenshot.png)
 
 ### 9. Enable the Configuration Files
 
@@ -189,13 +189,13 @@ You should see the virtual hosts listed for ports 81, 82, and 83.
 Open your browser and navigate to the following URLs:
 
 - `http://15.206.84.57:81` for `web1`
-  ![Web1 Loaded in Browser](/CentOS+httpd_multipleWebsites/portBased/img/web1-loaded-screenshot.png)
+  ![Web1 Loaded in Browser](/hostingMultipleWebsites/CentOS+httpd_multipleWebsites/portBased/img/web1-loaded-screenshot.png)
 
 - `http://15.206.84.57:82` for `web2`
-  ![Web2 Loaded in Browser](/CentOS+httpd_multipleWebsites/portBased/img/web2-loaded-screenshot.png)
+  ![Web2 Loaded in Browser](/hostingMultipleWebsites/CentOS+httpd_multipleWebsites/portBased/img/web2-loaded-screenshot.png)
 
 - `http://15.206.84.57:83` for `web3`
-  ![Web3 Loaded in Browser](/CentOS+httpd_multipleWebsites/portBased/img/web3-loaded-screenshot.png)
+  ![Web3 Loaded in Browser](/hostingMultipleWebsites/CentOS+httpd_multipleWebsites/portBased/img/web3-loaded-screenshot.png)
 
 Replace `15.206.84.57` with your EC2 instance's public IP address. You should see the `index.html` content for each respective website.
 
