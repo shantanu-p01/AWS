@@ -38,18 +38,35 @@ Install the Apache web server to handle HTTP requests:
 sudo apt install apache2 -y
 ```
 
-### 4. Install Git and Clone Website Templates
+### 4. Download Website Templates
 
-To quickly set up websites, clone some pre-built website templates from GitHub. First, install Git:
+You can download website templates using any of the following methods: `wget`, `curl`, or `git`.
+
+#### Using `git`:
 
 ```bash
 sudo apt install git -y
+git clone https://github.com/learning-zone/website-templates
 ```
 
-Then, clone a repository containing multiple website templates:
+#### Using `wget`:
 
 ```bash
-git clone https://github.com/learning-zone/website-templates
+sudo apt install wget -y
+wget https://github.com/learning-zone/website-templates/archive/refs/heads/master.zip
+sudo apt install unzip -y
+unzip master.zip
+mv website-templates-master website-templates
+```
+
+#### Using `curl`:
+
+```bash
+sudo apt install curl -y
+curl -L https://github.com/learning-zone/website-templates/archive/refs/heads/master.zip -o website-templates.zip
+sudo apt install unzip -y
+unzip website-templates.zip
+mv website-templates-master website-templates
 ```
 
 ### 5. Create Subdirectories for Each Website
@@ -99,5 +116,3 @@ Each URL should display the content from the corresponding website template.
 ## Conclusion
 
 You have successfully set up multiple websites using Apache2 and the directory method with pre-built templates. By placing different websites inside subdirectories under `/var/www/html`, you can easily host and manage multiple websites on a single EC2 instance.
-
----
