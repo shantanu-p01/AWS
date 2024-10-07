@@ -1,0 +1,24 @@
+Resources:
+  CloudFormationEC21113: # Give name for the EC2 Instance
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: ap-northeast-1a # Replace the Region where you want ur EC2 to be launched
+      ImageId: ami-0b20f552f63953f0e
+      InstanceType: t2.micro
+      KeyName: CloudFormationKeyPair1113 # Give the name of KeyPair we have created
+      SecurityGroups:
+        - !Ref CloudFormationEC2SecurityGroup1113 # Here add the Security Group Name as reference
+
+  CloudFormationEC2SecurityGroup1113:  # Give name for the EC2 Instance Security Group
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH and HTTP
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
