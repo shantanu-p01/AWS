@@ -1,7 +1,5 @@
 ### Access S3 Bucket from an EC2 instance
 
----
-
 #### Step 1: Launch an EC2 Instance
 
 1. **Go to EC2 service** and click on **Launch Instance**.
