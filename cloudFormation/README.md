@@ -49,7 +49,7 @@
 
 6. **Create Role**
    - Select **Trust Entity Type: AWS Service**.
-   - Select **Use Case: EC2**.
+   - Select **Use Case: CloudFormation**.
    - In the **Add Permission** section, search for `AmazonEC2FullAccess`.
    - Click **Next** and enter the **Role Name**: `ROLE-BCA-CCSA-TY-1113`.
    - Click on **Create Role**.
