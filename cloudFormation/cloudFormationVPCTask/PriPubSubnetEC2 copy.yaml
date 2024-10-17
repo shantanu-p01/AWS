@@ -1,0 +1,235 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  KeyPair:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    Type: String
+    Default: 1113AssignmentPubPrivSubentEC2 # Default key pair name, can be changed during stack creation
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+  Email:
+    Description: Email address to receive notifications
+    Type: String
+    Default: shantanu.verulkar.01@gmail.com # Default email address for notifications
+
+Resources:
+  # VPC Creation
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: MyVPC
+
+  # Public Subnet
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs ''
+      Tags:
+        - Key: Name
+          Value: PublicSubnet
+
+  # Private Subnet
+  PrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs ''
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet
+
+  # Internet Gateway for Public Subnet
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties: {}
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # Route Table for Public Subnet
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: PublicRouteTable
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  # NAT Gateway for Private Subnet
+  NatEIP:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    DependsOn: AttachGateway
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      AllocationId: !GetAtt NatEIP.AllocationId
+
+  # Route Table for Private Subnet
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: PrivateRouteTable
+
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+  PrivateSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet
+      RouteTableId: !Ref PrivateRouteTable
+
+  # EC2 Instance in Public Subnet (Ubuntu)
+  PublicEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties: 
+      InstanceType: t2.micro
+      KeyName: !Ref KeyPair
+      ImageId: ami-0b20f552f63953f0e # Replace with your preferred AMI ID for Ubuntu or another instance
+      SubnetId: !Ref PublicSubnet
+      Tags:
+        - Key: Name
+          Value: 1113PublicEC2Instance
+      SecurityGroupIds:
+        - !GetAtt PublicInstanceSecurityGroup.GroupId
+
+  # Security Group for Public EC2
+  PublicInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH and HTTP access to the public instance
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  # EC2 Instance in Private Subnet (CentOS)
+  PrivateEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName: !Ref KeyPair
+      ImageId: ami-074c801439a538a43 # Replace with your preferred AMI ID for CentOS
+      SubnetId: !Ref PrivateSubnet
+      Tags:
+        - Key: Name
+          Value: 1113PrivateEC2Instance
+      SecurityGroupIds:
+        - !GetAtt PrivateInstanceSecurityGroup.GroupId
+
+  # Security Group for Private EC2
+  PrivateInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH access to the private instance
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  # SNS Topic for Notifications
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref Email
+
+  # CloudWatch Alarm to monitor EC2 instance state
+  InstanceLaunchAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Alarm when both EC2 instances are launched"
+      MetricName: "StatusCheckFailed"
+      Namespace: "AWS/EC2"
+      Statistic: "Minimum"
+      Period: "300"
+      EvaluationPeriods: "1"
+      Threshold: "0"
+      ComparisonOperator: "GreaterThanThreshold"
+      Dimensions:
+        - Name: "InstanceId"
+          Value: !Ref PublicEC2Instance
+      AlarmActions:
+        - !Ref NotificationTopic
+      OKActions:
+        - !Ref NotificationTopic
+      InsufficientDataActions:
+        - !Ref NotificationTopic
+
+  # Additional Alarm for Private Instance
+  PrivateInstanceLaunchAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Alarm when the Private EC2 instance is launched"
+      MetricName: "StatusCheckFailed"
+      Namespace: "AWS/EC2"
+      Statistic: "Minimum"
+      Period: "300"
+      EvaluationPeriods: "1"
+      Threshold: "0"
+      ComparisonOperator: "GreaterThanThreshold"
+      Dimensions:
+        - Name: "InstanceId"
+          Value: !Ref PrivateEC2Instance
+      AlarmActions:
+        - !Ref NotificationTopic
+      OKActions:
+        - !Ref NotificationTopic
+      InsufficientDataActions:
+        - !Ref NotificationTopic
+
+Outputs:
+  PublicInstance:
+    Description: Public EC2 Instance ID
+    Value: !Ref PublicEC2Instance
+  PrivateInstance:
+    Description: Private EC2 Instance ID
+    Value: !Ref PrivateEC2Instance

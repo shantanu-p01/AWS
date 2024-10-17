@@ -1,0 +1,196 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  KeyPair:
+    Type: String
+    Description: Name of an EC2 Keypair
+    Default: 1113AssignmentPubPrivSubentEC2 
+  Email:
+    Type: String
+    Description: Email for Notifications
+    Default: shantanu.verulkar.01@gmail.com 
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: ap-northeast-1a
+
+  PrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: ap-northeast-1a
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  NatEIP:
+    Type: AWS::EC2::EIP
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      AllocationId: !GetAtt NatEIP.AllocationId
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+  PrivateSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet
+      RouteTableId: !Ref PrivateRouteTable
+
+  PublicEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties: 
+      InstanceType: t2.micro
+      KeyName: !Ref KeyPair
+      ImageId: ami-0b20f552f63953f0e
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref PublicInstanceSecurityGroup
+      Tags:
+        - Key: Name
+          Value: CCSA-BCA-TY-1113-PublicEC2Instance
+
+  PublicInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: allow ssh and http
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  PrivateEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName: !Ref KeyPair
+      ImageId: ami-074c801439a538a43
+      SubnetId: !Ref PrivateSubnet
+      SecurityGroupIds:
+        - !Ref PrivateInstanceSecurityGroup
+      Tags:
+        - Key: Name
+          Value: CCSA-BCA-TY-1113-PrivateEC2Instance
+
+  PrivateInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: allow ssh access
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref Email
+
+  InstanceLaunchAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Public EC2 Instance launched successfully"
+      MetricName: "StatusCheckFailed"
+      Namespace: "AWS/EC2"
+      Statistic: "Minimum"
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: "GreaterThanThreshold"
+      Dimensions:
+        - Name: "InstanceId"
+          Value: !Ref PublicEC2Instance
+      AlarmActions:
+        - !Ref NotificationTopic
+      OKActions:
+        - !Ref NotificationTopic
+      InsufficientDataActions:
+        - !Ref NotificationTopic
+
+  PrivateInstanceLaunchAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Private EC2 Instance launched successfully"
+      MetricName: "StatusCheckFailed"
+      Namespace: "AWS/EC2"
+      Statistic: "Minimum"
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: "GreaterThanThreshold"
+      Dimensions:
+        - Name: "InstanceId"
+          Value: !Ref PrivateEC2Instance
+      AlarmActions:
+        - !Ref NotificationTopic
+      OKActions:
+        - !Ref NotificationTopic
+      InsufficientDataActions:
+        - !Ref NotificationTopic
+
+Outputs:
+  PublicInstance:
+    Description: Public EC2 Instance
+    Value: !Ref PublicEC2Instance
+  PrivateInstance:
+    Description: Private EC2 Instance
+    Value: !Ref PrivateEC2Instance
